@@ -1,0 +1,85 @@
+pipeline:
+  name: Example Test Ingestion from CD
+  identifier: Example_Test_Ingestion_from_CD
+  projectIdentifier: Test_Bed
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: Deploy and Run Integration Tests
+        identifier: Deploy_and_Run_Integration_Tests
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: ShellScript
+                  name: Deploy
+                  identifier: Deploy
+                  spec:
+                    shell: Bash
+                    onDelegate: true
+                    source:
+                      type: Inline
+                      spec:
+                        script: echo "Deploying App to Test"
+                    environmentVariables: []
+                    outputVariables: []
+                  timeout: 10m
+              - step:
+                  type: Container
+                  name: Run Integration Tests
+                  identifier: Run_Integration_Tests
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: alpine
+                    command: |-
+                      wget https://raw.githubusercontent.com/testmoapp/junitxml/main/examples/junit-complete.xml
+                      TEST_RESULTS=$(cat junit-complete.xml| gzip - | base64 -w 0)
+                    shell: Sh
+                    infrastructure:
+                      type: KubernetesDirect
+                      spec:
+                        connectorRef: account.sacluster
+                        namespace: default
+                        resources:
+                          limits:
+                            cpu: "0.5"
+                            memory: 500Mi
+                    outputVariables:
+                      - name: TEST_RESULTS
+                    envVariables: {}
+                  timeout: 1m
+        tags: {}
+    - stage:
+        name: Ingest Test Results
+        identifier: Ingest_Test_Results
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: false
+          infrastructure:
+            type: KubernetesDirect
+            spec:
+              connectorRef: account.sacluster
+              namespace: default
+              automountServiceAccountToken: true
+              nodeSelector: {}
+              os: Linux
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Ingest Test Results
+                  identifier: Ingest_Test_Results
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: alpine
+                    shell: Sh
+                    command: echo <+pipeline.stages.Deploy_and_Run_Integration_Tests.spec.execution.steps.Run_Integration_Tests.ContainerStep.output.outputVariables.TEST_RESULTS> | base64 -d | gunzip - > /tmp/junit.xml
+                    reports:
+                      type: JUnit
+                      spec:
+                        paths:
+                          - /tmp/junit.xml
