@@ -1,0 +1,62 @@
+template:
+  name: Example Pipeline Template
+  identifier: Example_Pipeline_Template
+  versionLabel: 1.0.0
+  type: Pipeline
+  projectIdentifier: Template_Examples
+  orgIdentifier: default
+  tags: {}
+  spec:
+    stages:
+      - stage:
+          name: Deploy Example
+          identifier: Deploy_Example
+          description: ""
+          type: Deployment
+          spec:
+            deploymentType: Kubernetes
+            service:
+              serviceRef: s1
+              serviceInputs:
+                serviceDefinition:
+                  type: Kubernetes
+                  spec:
+                    manifests:
+                      - manifest:
+                          identifier: helmchart
+                          type: HelmChart
+                          spec:
+                            store:
+                              type: Github
+                              spec:
+                                branch: <+input>
+            environment:
+              environmentRef: dev
+              deployToAll: false
+              infrastructureDefinitions:
+                - identifier: dev
+            execution:
+              steps:
+                - step:
+                    name: Rollout Deployment
+                    identifier: rolloutDeployment
+                    type: K8sRollingDeploy
+                    timeout: 10m
+                    spec:
+                      skipDryRun: false
+                      pruningEnabled: false
+              rollbackSteps:
+                - step:
+                    name: Rollback Rollout Deployment
+                    identifier: rollbackRolloutDeployment
+                    type: K8sRollingRollback
+                    timeout: 10m
+                    spec:
+                      pruningEnabled: false
+          tags: {}
+          failureStrategies:
+            - onFailure:
+                errors:
+                  - AllErrors
+                action:
+                  type: StageRollback
