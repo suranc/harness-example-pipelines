@@ -77,7 +77,9 @@ pipeline:
                     connectorRef: account.harnessImage
                     image: alpine
                     shell: Sh
-                    command: echo <+pipeline.stages.Deploy_and_Run_Integration_Tests.spec.execution.steps.Run_Integration_Tests.ContainerStep.output.outputVariables.TEST_RESULTS> | base64 -d | gunzip - > /tmp/junit.xml
+                    command: |-
+                      echo <+pipeline.stages.Deploy_and_Run_Integration_Tests.spec.execution.steps.Run_Integration_Tests.ContainerStep.output.outputVariables.TEST_RESULTS> | base64 -d | gunzip - > /tmp/junit.xml
+                      test
                     reports:
                       type: JUnit
                       spec:
