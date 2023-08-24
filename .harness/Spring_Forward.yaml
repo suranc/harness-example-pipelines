@@ -51,7 +51,7 @@ inputSet:
                               - identifier: Spring_Forward_Artifact_Source
                                 type: DockerRegistry
                                 spec:
-                                  tag: <+input>
+                                  tag: harness-<+codebase.commitSha>
                 environment:
                   environmentRef: Test
                   infrastructureDefinitions:
@@ -61,10 +61,9 @@ inputSet:
               type: Deployment
               spec:
                 environment:
-                  environmentRef: <+input>
-                  environmentInputs: <+input>
-                  serviceOverrideInputs: <+input>
-                  infrastructureDefinitions: <+input>
+                  environmentRef: Prod
+                  infrastructureDefinitions:
+                    - identifier: Prod
         variables:
           - name: docker_image
             type: String
