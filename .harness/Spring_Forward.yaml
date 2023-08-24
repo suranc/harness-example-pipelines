@@ -1,0 +1,65 @@
+inputSet:
+  name: Spring Forward
+  identifier: Spring_Forward
+  orgIdentifier: default
+  projectIdentifier: Spring_Forward
+  pipeline:
+    identifier: Build_Scan_and_Deploy
+    template:
+      templateInputs:
+        properties:
+          ci:
+            codebase:
+              connectorRef: account.suranc_Account_Level
+              repoName: spring-forward-harness-example
+              build:
+                type: branch
+                spec:
+                  branch: master
+        stages:
+          - stage:
+              identifier: Build_Image
+              type: CI
+              spec:
+                infrastructure:
+                  type: KubernetesDirect
+                  spec:
+                    connectorRef: account.sacluster
+                    namespace: suran-sf-ff-test
+                execution:
+                  steps:
+                    - step:
+                        identifier: Build_Image
+                        type: BuildAndPushDockerRegistry
+                        spec:
+                          connectorRef: account.Account_Level_suranc_GitHub_Docker_Registry
+                          repo: <+input>
+          - stage:
+              identifier: Deploy_to_Test
+              type: Deployment
+              spec:
+                service:
+                  serviceRef: <+input>
+                  serviceInputs: <+input>
+                environment:
+                  environmentRef: <+input>
+                  environmentInputs: <+input>
+                  serviceOverrideInputs: <+input>
+                  infrastructureDefinitions: <+input>
+          - stage:
+              identifier: Deploy_to_Prod
+              type: Deployment
+              spec:
+                environment:
+                  environmentRef: <+input>
+                  environmentInputs: <+input>
+                  serviceOverrideInputs: <+input>
+                  infrastructureDefinitions: <+input>
+        variables:
+          - name: docker_image
+            type: String
+            value: ghcr.io/suranc/spring-forward-harness-example
+          - name: docker_tag
+            type: String
+            value: harness-<+codebase.commitSha>
+  object Object: pipeline.template.templateInputs.properties.ci.codebase
