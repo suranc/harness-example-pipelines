@@ -34,19 +34,28 @@ inputSet:
                         type: BuildAndPushDockerRegistry
                         spec:
                           connectorRef: account.Account_Level_suranc_GitHub_Docker_Registry
-                          repo: <+input>
           - stage:
               identifier: Deploy_to_Test
               type: Deployment
               spec:
                 service:
-                  serviceRef: <+input>
-                  serviceInputs: <+input>
+                  serviceRef: Spring_Forward
+                  serviceInputs:
+                    serviceDefinition:
+                      type: Kubernetes
+                      spec:
+                        artifacts:
+                          primary:
+                            primaryArtifactRef: Spring_Forward_Artifact_Source
+                            sources:
+                              - identifier: Spring_Forward_Artifact_Source
+                                type: DockerRegistry
+                                spec:
+                                  tag: <+input>
                 environment:
-                  environmentRef: <+input>
-                  environmentInputs: <+input>
-                  serviceOverrideInputs: <+input>
-                  infrastructureDefinitions: <+input>
+                  environmentRef: Test
+                  infrastructureDefinitions:
+                    - identifier: Spring_Forward_Test
           - stage:
               identifier: Deploy_to_Prod
               type: Deployment
