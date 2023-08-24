@@ -1,5 +1,6 @@
 inputSet:
   name: Spring Forward
+  tags: {}
   identifier: Spring_Forward
   orgIdentifier: default
   projectIdentifier: Spring_Forward
@@ -62,4 +63,3 @@ inputSet:
           - name: docker_tag
             type: String
             value: harness-<+codebase.commitSha>
-  object Object: pipeline.template.templateInputs.properties.ci.codebase
