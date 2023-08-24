@@ -29,7 +29,6 @@ pipeline:
                       type: BuildAndPushDockerRegistry
                       spec:
                         connectorRef: <+input>
-                        repo: <+input>
         - stage:
             identifier: Deploy_to_Test
             type: Deployment
