@@ -50,6 +50,23 @@ pipeline:
                 environmentInputs: <+input>
                 serviceOverrideInputs: <+input>
                 infrastructureDefinitions: <+input>
+              execution:
+                steps:
+                  - stepGroup:
+                      identifier: canaryDepoyment
+                      steps:
+                        - step:
+                            identifier: Verify
+                            type: Verify
+                            spec:
+                              type: Canary
+                              monitoredService:
+                                type: Template
+                                spec:
+                                  templateInputs:
+                                    type: Application
+                                    serviceRef: <+input>
+                                    environmentRef: <+input>
       variables:
         - name: docker_image
           type: String
