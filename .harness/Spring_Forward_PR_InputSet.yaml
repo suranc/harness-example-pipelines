@@ -16,7 +16,7 @@ inputSet:
               build:
                 type: PR
                 spec:
-                  number: <+codebase.prNumber>
+                  number: <+input>
         stages:
           - stage:
               identifier: Build_Image
