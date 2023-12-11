@@ -1,5 +1,6 @@
 inputSet:
   name: Spring Forward
+  tags: {}
   identifier: Spring_Forward
   orgIdentifier: default
   projectIdentifier: Spring_Forward
@@ -48,4 +49,5 @@ inputSet:
                                   tag: pr-6
                 environment:
                   environmentRef: PR
-  object Object: pipeline.template.templateInputs.properties.ci.codebase
+                  infrastructureDefinitions:
+                    - identifier: PR
