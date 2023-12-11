@@ -16,7 +16,7 @@ inputSet:
               build:
                 type: PR
                 spec:
-                  number: <+input>
+                  number: <+trigger.prNumber>
         stages:
           - stage:
               identifier: Build_Image
