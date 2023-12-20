@@ -36,7 +36,7 @@ pipeline:
                     projectID: sales-209522
                     imageName: spring-forward/spring-forward
                     tags:
-                      - example
+                      - harness-<+codebase.commitSha>
     - stage:
         name: Deploy
         identifier: Deploy
