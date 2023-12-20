@@ -1,0 +1,30 @@
+inputSet:
+  name: Spring Forward
+  identifier: Spring_Forward
+  orgIdentifier: default
+  projectIdentifier: GCP
+  pipeline:
+    identifier: Build_and_Deploy_to_Google_Cloud_Run
+    properties:
+      ci:
+        codebase:
+          build: <+input>
+    stages:
+      - stage:
+          identifier: Deploy
+          type: Deployment
+          spec:
+            service:
+              serviceInputs:
+                serviceDefinition:
+                  type: CustomDeployment
+                  spec:
+                    artifacts:
+                      primary:
+                        primaryArtifactRef: SpringForward2
+                        sources:
+                          - identifier: SpringForward2
+                            type: GoogleArtifactRegistry
+                            spec:
+                              version: harness-<+codebase.commitSha>
+  object Object: pipeline.properties.ci.codebase
