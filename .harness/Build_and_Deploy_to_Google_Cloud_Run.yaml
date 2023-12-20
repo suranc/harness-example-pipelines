@@ -1,0 +1,39 @@
+pipeline:
+  name: Build and Deploy to Google Cloud Run
+  identifier: Build_and_Deploy_to_Google_Cloud_Run
+  projectIdentifier: GCP
+  orgIdentifier: default
+  tags: {}
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.suranc_Account_Level_Connected_Through_Platform
+        repoName: spring-forward-harness-example
+        build: <+input>
+  stages:
+    - stage:
+        name: Build
+        identifier: Build
+        description: ""
+        type: CI
+        spec:
+          cloneCodebase: true
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
+          execution:
+            steps:
+              - step:
+                  type: BuildAndPushGAR
+                  name: BuildAndPushGAR_1
+                  identifier: BuildAndPushGAR_1
+                  spec:
+                    connectorRef: account.GCP_OIDC
+                    host: us-central1-docker.pkg.dev
+                    projectID: sales-209522
+                    imageName: spring-forward/spring-forward
+                    tags:
+                      - example
