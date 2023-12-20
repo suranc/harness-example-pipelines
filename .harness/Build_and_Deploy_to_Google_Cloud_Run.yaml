@@ -37,3 +37,89 @@ pipeline:
                     imageName: spring-forward/spring-forward
                     tags:
                       - example
+    - stage:
+        name: Deploy
+        identifier: Deploy
+        description: ""
+        type: Deployment
+        spec:
+          deploymentType: CustomDeployment
+          customDeploymentRef:
+            templateRef: account.Google_Cloud_Run
+            versionLabel: 1.0.0
+          service:
+            serviceRef: Spring_Forward
+            serviceInputs:
+              serviceDefinition:
+                type: CustomDeployment
+                spec:
+                  artifacts:
+                    primary:
+                      primaryArtifactRef: <+input>
+                      sources: <+input>
+          execution:
+            steps:
+              - step:
+                  name: Fetch Instances
+                  identifier: fetchInstances
+                  type: FetchInstanceScript
+                  timeout: 10m
+                  spec: {}
+              - step:
+                  name: Deploy
+                  identifier: Deploy
+                  template:
+                    templateRef: account.Deploy_Google_Cloud_Run
+                    versionLabel: 1.0.0
+                    templateInputs:
+                      type: ShellScript
+                      spec:
+                        environmentVariables:
+                          - name: artifact_image
+                            type: String
+                            value: <+artifact.image>
+                        delegateSelectors:
+                          - gcp-workload-delegate
+              - step:
+                  type: HarnessApproval
+                  name: HarnessApproval_1
+                  identifier: HarnessApproval_1
+                  spec:
+                    approvalMessage: Please review the following information and approve the pipeline progression
+                    includePipelineExecutionHistory: true
+                    isAutoRejectEnabled: false
+                    approvers:
+                      userGroups:
+                        - account._account_all_users
+                      minimumCount: 1
+                      disallowPipelineExecutor: false
+                    approverInputs: []
+                  timeout: 1d
+            rollbackSteps:
+              - step:
+                  name: Rollback Google Cloud Run Service
+                  identifier: Rollback_Google_Cloud_Run_Service
+                  template:
+                    templateRef: account.Deploy_Google_Cloud_Run
+                    versionLabel: 1.0.0
+                    templateInputs:
+                      type: ShellScript
+                      spec:
+                        environmentVariables:
+                          - name: artifact_image
+                            type: String
+                            value: <+rollbackArtifact.image>
+                        delegateSelectors:
+                          - gcp-workload-delegate
+          environment:
+            environmentRef: Dev
+            deployToAll: false
+            infrastructureDefinitions:
+              - identifier: Dev2
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: StageRollback
