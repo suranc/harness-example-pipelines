@@ -1,0 +1,100 @@
+inputSet:
+  name: Spring Forward
+  identifier: Spring_Forward
+  orgIdentifier: default
+  projectIdentifier: GCP
+  pipeline:
+    identifier: Build_and_Deploy_to_CloudRun_with_Canary
+    template:
+      templateInputs:
+        stages:
+          - stage:
+              identifier: Build_and_Scan
+              template:
+                templateInputs:
+                  type: CI
+                  spec:
+                    execution:
+                      steps:
+                        - step:
+                            identifier: gcpoidc
+                            type: Plugin
+                            spec:
+                              connectorRef: account.DockerHub_Account_Level_Connect_Through_Platform
+                        - step:
+                            identifier: BuildAndPushGAR_1
+                            type: BuildAndPushGAR
+                            spec:
+                              connectorRef: account.GCP_OIDC
+                  variables:
+                    - name: serviceAccountEmailId
+                      type: String
+                      value: secops-9982@sales-209522.iam.gserviceaccount.com
+                    - name: poolId
+                      type: String
+                      value: suranharnessaccountconnector
+                    - name: providerId
+                      type: String
+                      value: suranharnessaccount
+                    - name: projectNumber
+                      type: String
+                      value: "980596850008"
+          - stage:
+              identifier: Deploy_to_Test
+              template:
+                templateInputs:
+                  type: Deployment
+                  spec:
+                    environment:
+                      environmentRef: Dev
+                      infrastructureDefinitions:
+                        - identifier: DevRec
+                    service:
+                      serviceRef: springforward
+                      serviceInputs:
+                        serviceDefinition:
+                          type: CustomDeployment
+                          spec:
+                            artifacts:
+                              primary:
+                                primaryArtifactRef: SpringForward2
+                                sources:
+                                  - identifier: SpringForward2
+                                    type: GoogleArtifactRegistry
+                                    spec:
+                                      version: <+pipeline.variables.docker_tag>
+          - stage:
+              identifier: Approval
+              type: Approval
+              spec:
+                execution:
+                  steps:
+                    - step:
+                        identifier: Approval
+                        type: HarnessApproval
+                        spec:
+                          approvers:
+                            userGroups:
+                              - account._account_all_users
+          - stage:
+              identifier: Deploy_to_Prod
+              template:
+                templateInputs:
+                  type: Deployment
+                  spec:
+                    environment:
+                      environmentRef: Dev
+                      infrastructureDefinitions:
+                        - identifier: DevRec
+        properties:
+          ci:
+            codebase:
+              build: <+input>
+        variables:
+          - name: docker_image
+            type: String
+            value: us-central1-docker.pkg.dev/sales-209522/spring-forward/spring-forward
+          - name: docker_tag
+            type: String
+            value: <+input>
+  object Object: pipeline.template.templateInputs.properties.ci.codebase
