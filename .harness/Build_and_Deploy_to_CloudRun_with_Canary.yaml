@@ -1,0 +1,91 @@
+pipeline:
+  name: Build and Deploy to CloudRun with Canary
+  identifier: Build_and_Deploy_to_CloudRun_with_Canary
+  tags: {}
+  template:
+    templateRef: account.Build_Scan_and_Deploy_CloudRun_with_Canary
+    versionLabel: "1"
+    gitBranch: master
+    templateInputs:
+      stages:
+        - stage:
+            identifier: Build_and_Scan
+            template:
+              templateInputs:
+                type: CI
+                spec:
+                  execution:
+                    steps:
+                      - step:
+                          identifier: gcpoidc
+                          type: Plugin
+                          spec:
+                            connectorRef: <+input>
+                      - step:
+                          identifier: BuildAndPushGAR_1
+                          type: BuildAndPushGAR
+                          spec:
+                            connectorRef: <+input>
+                variables:
+                  - name: serviceAccountEmailId
+                    type: String
+                    value: <+input>
+                  - name: poolId
+                    type: String
+                    value: <+input>
+                  - name: providerId
+                    type: String
+                    value: <+input>
+                  - name: projectNumber
+                    type: String
+                    value: <+input>
+        - stage:
+            identifier: Deploy_to_Test
+            template:
+              templateInputs:
+                type: Deployment
+                spec:
+                  environment:
+                    environmentRef: <+input>
+                    environmentInputs: <+input>
+                    serviceOverrideInputs: <+input>
+                    infrastructureDefinitions: <+input>
+                  service:
+                    serviceRef: <+input>
+                    serviceInputs: <+input>
+        - stage:
+            identifier: Approval
+            type: Approval
+            spec:
+              execution:
+                steps:
+                  - step:
+                      identifier: Approval
+                      type: HarnessApproval
+                      spec:
+                        approvers:
+                          userGroups: <+input>
+        - stage:
+            identifier: Deploy_to_Prod
+            template:
+              templateInputs:
+                type: Deployment
+                spec:
+                  environment:
+                    environmentRef: <+input>
+                    environmentInputs: <+input>
+                    serviceOverrideInputs: <+input>
+                    infrastructureDefinitions: <+input>
+      properties:
+        ci:
+          codebase:
+            build: <+input>
+      variables:
+        - name: docker_image
+          type: String
+          value: <+input>
+        - name: docker_tag
+          type: String
+          value: <+input>
+  projectIdentifier: GCP
+  orgIdentifier: default
