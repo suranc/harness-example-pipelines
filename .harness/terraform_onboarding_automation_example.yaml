@@ -1,0 +1,72 @@
+pipeline:
+  name: terraform-example
+  identifier: terraformexample
+  projectIdentifier: Test_Bed
+  orgIdentifier: default
+  tags: {}
+  stages:
+    - stage:
+        name: terraform
+        identifier: terraform
+        description: ""
+        type: Custom
+        spec:
+          execution:
+            steps:
+              - step:
+                  type: TerraformPlan
+                  name: TerraformPlan_1
+                  identifier: TerraformPlan_1
+                  spec:
+                    provisionerIdentifier: pipeline
+                    configuration:
+                      command: Apply
+                      configFiles:
+                        store:
+                          spec:
+                            connectorRef: account.suranc_Account_Level
+                            repoName: harness-template-playground
+                            gitFetchType: Branch
+                            branch: master
+                            folderPath: .
+                          type: Github
+                      varFiles:
+                        - varFile:
+                            spec:
+                              content: |-
+                                org_id = "<+pipeline.variables.org_id>"
+                                account_id = "TEyxLP87RquOEph_GrbYvQ"
+                                project_id = "<+pipeline.variables.project_id>"
+                                api_key = "<+secrets.getValue("account.terraform_example_harness_apikey")>"
+                            identifier: inputs
+                            type: Inline
+                      secretManagerRef: harnessSecretManager
+                      skipRefreshCommand: false
+                  timeout: 10m
+              - step:
+                  type: TerraformApply
+                  name: TerraformApply_1
+                  identifier: TerraformApply_1
+                  spec:
+                    provisionerIdentifier: pipeline
+                    configuration:
+                      type: InheritFromPlan
+                  timeout: 10m
+        tags: {}
+        failureStrategies:
+          - onFailure:
+              errors:
+                - AllErrors
+              action:
+                type: Abort
+  variables:
+    - name: org_id
+      type: String
+      description: ""
+      required: false
+      value: <+input>
+    - name: project_id
+      type: String
+      description: ""
+      required: false
+      value: <+input>
