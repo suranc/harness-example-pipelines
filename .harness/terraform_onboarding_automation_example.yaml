@@ -41,6 +41,7 @@ pipeline:
                             identifier: inputs
                             type: Inline
                       secretManagerRef: harnessSecretManager
+                      skipStateStorage: true
                       skipRefreshCommand: false
                   timeout: 10m
               - step:
