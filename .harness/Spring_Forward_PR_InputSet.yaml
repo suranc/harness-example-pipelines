@@ -11,7 +11,7 @@ inputSet:
         properties:
           ci:
             codebase:
-              connectorRef: account.suranc_Account_Level
+              connectorRef: account.suranc_GitHub_App_Account_Level
               repoName: spring-forward-harness-example
               build:
                 type: PR
