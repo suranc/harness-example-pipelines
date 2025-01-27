@@ -51,7 +51,7 @@ inputSet:
                               - identifier: Spring_Forward_Artifact_Source
                                 type: DockerRegistry
                                 spec:
-                                  tag: harness-<+codebase.commitSha>
+                                  tag: <+pipeline.stages.Build_Image.spec.execution.steps.Build_Image.artifact_Build_Image.stepArtifacts.publishedImageArtifacts[0].tag>
                 environment:
                   environmentRef: Test
                   infrastructureDefinitions:
