@@ -26,7 +26,7 @@ inputSet:
                   type: KubernetesDirect
                   spec:
                     connectorRef: account.sacluster
-                    namespace: suran-sf-ff-test
+                    namespace: chris-builds
                 execution:
                   steps:
                     - step:
