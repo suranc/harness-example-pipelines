@@ -1,0 +1,60 @@
+inputSet:
+  name: Service2
+  identifier: Service2
+  orgIdentifier: default
+  projectIdentifier: Spring_Forward
+  pipeline:
+    identifier: Build_Scan_and_Deploy
+    template:
+      templateInputs:
+        properties:
+          ci:
+            codebase:
+              connectorRef: <+input>
+              repoName: <+input>
+              build: <+input>
+        stages:
+          - stage:
+              identifier: Build_Image
+              type: CI
+              spec:
+                infrastructure:
+                  type: KubernetesDirect
+                  spec:
+                    connectorRef: <+input>
+                    namespace: <+input>
+                execution:
+                  steps:
+                    - step:
+                        identifier: Build_Image
+                        type: BuildAndPushDockerRegistry
+                        spec:
+                          connectorRef: <+input>
+          - stage:
+              identifier: Deploy_to_Test
+              type: Deployment
+              spec:
+                service:
+                  serviceRef: <+input>
+                  serviceInputs: <+input>
+                environment:
+                  environmentRef: <+input>
+                  environmentInputs: <+input>
+                  serviceOverrideInputs: <+input>
+                  infrastructureDefinitions: <+input>
+          - stage:
+              identifier: Deploy_to_Prod
+              type: Deployment
+              spec:
+                environment:
+                  environmentRef: <+input>
+                  environmentInputs: <+input>
+                  serviceOverrideInputs: <+input>
+                  infrastructureDefinitions: <+input>
+        variables:
+          - name: docker_image
+            type: String
+            value: The image name where the image being built will be pushed to
+          - name: docker_tag
+            type: String
+            value: harness-<+codebase.commitSha>
