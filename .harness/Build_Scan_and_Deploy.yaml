@@ -1,10 +1,10 @@
 pipeline:
   name: "Build Scan and Deploy "
   identifier: Build_Scan_and_Deploy
+  tags: {}
   template:
     templateRef: account.Build_Scan_and_Deploy
-    versionLabel: 1.0.0
-    gitBranch: master
+    versionLabel: v2
     templateInputs:
       properties:
         ci:
@@ -29,6 +29,10 @@ pipeline:
                       type: BuildAndPushDockerRegistry
                       spec:
                         connectorRef: <+input>
+                  - parallel:
+                      - insert:
+                          identifier: Extra_Testing
+                          steps: <+input>
         - stage:
             identifier: Deploy_to_Test
             type: Deployment
@@ -50,6 +54,11 @@ pipeline:
                 environmentInputs: <+input>
                 serviceOverrideInputs: <+input>
                 infrastructureDefinitions: <+input>
+              execution:
+                steps:
+                  - insert:
+                      identifier: Approval
+                      steps: <+input>
       variables:
         - name: docker_image
           type: String
@@ -57,6 +66,5 @@ pipeline:
         - name: docker_tag
           type: String
           value: <+input>.default(harness-<+codebase.commitSha>)
-  tags: {}
   projectIdentifier: Spring_Forward
   orgIdentifier: default
