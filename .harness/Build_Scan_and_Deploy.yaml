@@ -58,7 +58,22 @@ pipeline:
                 steps:
                   - insert:
                       identifier: Approval
-                      steps: <+input>
+                      steps:
+                        - step:
+                            type: HarnessApproval
+                            name: HarnessApproval_1
+                            identifier: HarnessApproval_1
+                            spec:
+                              approvalMessage: Please review the following information and approve the pipeline progression
+                              includePipelineExecutionHistory: true
+                              isAutoRejectEnabled: false
+                              approvers:
+                                userGroups:
+                                  - account._account_all_users
+                                minimumCount: 1
+                                disallowPipelineExecutor: false
+                              approverInputs: []
+                            timeout: 1d
       variables:
         - name: docker_image
           type: String
