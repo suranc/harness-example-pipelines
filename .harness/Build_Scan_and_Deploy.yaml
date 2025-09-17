@@ -58,7 +58,21 @@ pipeline:
                 steps:
                   - insert:
                       identifier: Approval
-                      steps: <+input>
+                      steps:
+                        - step:
+                            type: ShellScript
+                            name: ShellScript_1
+                            identifier: ShellScript_1
+                            spec:
+                              shell: Bash
+                              executionTarget: {}
+                              source:
+                                type: Inline
+                                spec:
+                                  script: adafdaffd
+                              environmentVariables: []
+                              outputVariables: []
+                            timeout: 10m
       variables:
         - name: docker_image
           type: String
