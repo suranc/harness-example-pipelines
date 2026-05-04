@@ -1,5 +1,6 @@
 inputSet:
   name: testaaaaa
+  tags: {}
   identifier: testaaaaa
   orgIdentifier: default
   projectIdentifier: Spring_Forward
@@ -54,7 +55,8 @@ inputSet:
         variables:
           - name: docker_image
             type: String
-            value: The image name where the image being built will be pushed to
+            value: <+input>
           - name: docker_tag
             type: String
             value: harness-<+codebase.commitSha>
+  isInlineHCEntity: false
